@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Barra Colegio | TINGUI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style id="dynamic-styles">
+        :root {
+            --bg-deep: #0a0a0a;
+            --card-matte: #1a1a1a;
+            --gold-accent: #c5a059;
+            --text-main: #e0e0e0;
+            --border-soft: #333333;
+        }
+
+        body { 
+            background-color: var(--bg-deep); 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main);
+            padding: 20px 10px;
+            transition: all 0.3s ease;
+        }
+
+        h1 { font-family: 'Cinzel', serif; letter-spacing: 4px; color: #fff; text-transform: uppercase; }
+
+        .view-pc .list-card {
+            background: var(--card-matte);
+            border: 1px solid var(--border-soft);
+            padding: 25px;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .view-pc .col-custom { width: 33.33%; }
+        .view-pc h1 { font-size: 2.5rem; }
+
+        .view-mobile .list-card {
+            background: var(--card-matte);
+            border: 1px solid var(--border-soft);
+            padding: 15px;
+            height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .view-mobile .col-custom { width: 50%; }
+        .view-mobile h1 { font-size: 1.5rem; letter-spacing: 2px; }
+
+        .list-card h5 { 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
+            border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 10px;
+            color: var(--gold-accent);
+        }
+        .list-footer { font-weight: 600; color: #fff; text-align: right; }
+
+        .modal-content { background: var(--card-matte); border: 1px solid var(--gold-accent); border-radius: 0; color: #fff; }
+        .person-item { padding: 12px 0; border-bottom: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center; }
+        .resaltado { background: rgba(197, 160, 89, 0.15) !important; border-left: 4px solid var(--gold-accent); padding-left: 10px; }
+
+        .btn-gold {
+            background: transparent;
+            border: 1px solid var(--gold-accent);
+            color: var(--gold-accent);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 10px 20px;
+            transition: 0.3s;
+        }
+        .btn-gold:hover { background: var(--gold-accent); color: #000; }
+
+        .btn-toggle { background: #222; color: var(--gold-accent); border: 1px solid var(--gold-accent); font-size: 0.65rem; padding: 5px 15px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        
+        .total-display { border-top: 1px solid var(--border-soft); margin-top: 40px; padding-top: 20px; text-align: center; }
+        .credits { margin-top: 30px; font-size: 0.65rem; color: var(--gold-accent); text-transform: uppercase; opacity: 0.7; }
+        .action-link { cursor: pointer; font-size: 0.75rem; }
+    </style>
+</head>
+<body class="view-pc" id="main-body">
+
+<div class="container text-center">
+    <button class="btn-toggle shadow-sm" onclick="toggleView()">Cambiar a Vista Móvil / PC</button>
+    
+    <header class="mb-4">
+        <h1>Listas</h1>
+        <p class="text-muted small">MENÚ PRINCIPAL</p>
+        <button class="btn btn-outline-secondary btn-sm px-4" id="btnNuevaSublista">NUEVA LISTA</button>
+    </header>
+
+    <div id="contenedor-listas" class="row g-3 text-start justify-content-center"></div>
+
+    <div class="total-display">
+        <p class="small text-muted mb-1">TOTAL ACUMULADO</p>
+        <h2 id="recaudacion-total" style="color: var(--gold-accent);">0 €</h2>
+        <button class="btn btn-gold mt-3 px-5" id="btnDescargarPdf">Descargar PDF</button>
+    </div>
+
+    <div class="credits">
+        Hecho por Tingui para Tyomu
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetalle" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-uppercase" id="modalNombreLista" style="color: var(--gold-accent);">LISTA</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4 pb-4">
+                <div class="row">
+                    <div class="col-md-7 border-md-end border-secondary">
+                        <div id="lista-personas-detalle"></div>
+                    </div>
+                    <div class="col-md-5 ps-md-4 mt-4 mt-md-0">
+                        <div class="mb-4">
+                            <small class="text-muted d-block">Subtotal</small>
+                            <h4 id="subtotal-lista">0 €</h4>
+                        </div>
+                        <button class="btn btn-gold w-100 mb-2" id="btnSumarPersona">Añadir Persona</button>
+                        <button class="btn btn-outline-danger w-100 border-0 btn-sm" id="btnBorrarLista">Eliminar Lista</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAxul5Gn04Sq4pXWzqwa1OA414jDRCn06M",
+        authDomain: "barracolegio-f5c91.firebaseapp.com",
+        databaseURL: "https://barracolegio-f5c91-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "barracolegio-f5c91",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const listasRef = ref(db, 'listas');
+    let listaActualId = null;
+
+    const currentView = localStorage.getItem('userView') || 'view-pc';
+    document.getElementById('main-body').className = currentView;
+
+    window.toggleView = () => {
+        const body = document.getElementById('main-body');
+        const newView = body.classList.contains('view-pc') ? 'view-mobile' : 'view-pc';
+        body.className = newView;
+        localStorage.setItem('userView', newView);
+    };
+
+    const caps = (s) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase();
+
+    onValue(listasRef, (snapshot) => {
+        const contenedor = document.getElementById('contenedor-listas');
+        const totalGlobalLabel = document.getElementById('recaudacion-total');
+        contenedor.innerHTML = '';
+        const data = snapshot.val();
+        let granTotal = 0;
+
+        if (data) {
+            Object.keys(data).forEach(id => {
+                const sub = data[id];
+                const count = sub.invitados ? Object.keys(sub.invitados).length : 0;
+                granTotal += (count * 15);
+                const col = document.createElement('div');
+                col.className = 'col-custom p-2';
+                col.innerHTML = `<div class="list-card" onclick="abrirDetalle('${id}', '${sub.nombre}')">
+                    <h5>${sub.nombre}</h5><div class="list-footer">${count * 15} €</div></div>`;
+                contenedor.appendChild(col);
+            });
+        }
+        totalGlobalLabel.innerText = `${granTotal} €`;
+    });
+
+    window.abrirDetalle = (id, nombre) => {
+        listaActualId = id;
+        document.getElementById('modalNombreLista').innerText = nombre;
+        const myModal = new bootstrap.Modal(document.getElementById('modalDetalle'));
+        onValue(ref(db, `listas/${id}`), (snapshot) => {
+            const data = snapshot.val();
+            const listaPersonas = document.getElementById('lista-personas-detalle');
+            const subtotalLabel = document.getElementById('subtotal-lista');
+            listaPersonas.innerHTML = '';
+            if (data && data.invitados) {
+                const invitados = Object.entries(data.invitados);
+                invitados.sort((a, b) => a[1].apellido.toLowerCase().localeCompare(b[1].apellido.toLowerCase()));
+                subtotalLabel.innerText = `${invitados.length * 15} €`;
+                invitados.forEach(([invId, inv]) => {
+                    const item = document.createElement('div');
+                    item.className = `person-item ${inv.resaltado ? 'resaltado' : ''}`;
+                    item.innerHTML = `<span>${caps(inv.nombre)} ${caps(inv.apellido)}</span>
+                        <div class="d-flex gap-2">
+                            <span class="action-link" style="color: var(--gold-accent)" onclick="toggleResaltar('${invId}', ${inv.resaltado})">Resaltar</span>
+                            <span class="action-link text-danger" onclick="eliminarInvitado('${invId}')">Borrar</span>
+                        </div>`;
+                    listaPersonas.appendChild(item);
+                });
+            } else { subtotalLabel.innerText = "0 €"; }
+        });
+        myModal.show();
+    };
+
+    document.getElementById('btnNuevaSublista').onclick = () => {
+        const n = prompt("Nombre de la lista:");
+        if (n) push(listasRef, { nombre: n.trim() });
+    };
+
+    document.getElementById('btnSumarPersona').onclick = () => {
+        const nom = prompt("Nombre:");
+        const ape = prompt("Apellido:");
+        if (nom && ape) {
+            push(ref(db, `listas/${listaActualId}/invitados`), { nombre: nom.trim(), apellido: ape.trim(), resaltado: false });
+        }
+    };
+
+    window.toggleResaltar = (invId, estado) => update(ref(db, `listas/${listaActualId}/invitados/${invId}`), { resaltado: !estado });
+    window.eliminarInvitado = (invId) => { if(confirm("¿Borrar?")) remove(ref(db, `listas/${listaActualId}/invitados/${invId}`)); };
+    document.getElementById('btnBorrarLista').onclick = () => { if(confirm("¿Eliminar lista?")) remove(ref(db, `listas/${listaActualId}`)); };
+
+    document.getElementById('btnDescargarPdf').onclick = () => {
+        onValue(listasRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+            let todos = [];
+            Object.values(data).forEach(sub => {
+                if (sub.invitados) Object.values(sub.invitados).forEach(inv => todos.push(inv));
+            });
+            todos.sort((a, b) => a.apellido.toLowerCase().localeCompare(b.apellido.toLowerCase()));
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont("times", "bold");
+            doc.setFontSize(22);
+            doc.text("LISTA DE BARRA", 105, 20, { align: "center" });
+            
+            // Subtítulo con el total de personas
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.text(`TOTAL PERSONAS: ${todos.length}`, 105, 28, { align: "center" });
+            
+            doc.autoTable({
+                startY: 35,
+                head: [['Nº', 'NOMBRE Y APELLIDO']],
+                body: todos.map((i, index) => [
+                    (index + 1).toString(), 
+                    `${caps(i.nombre)} ${caps(i.apellido)}`.toUpperCase()
+                ]),
+                theme: 'plain',
+                headStyles: { textColor: [0, 0, 0], fontStyle: 'bold', borderBottom: { lineWidth: 0.5 } },
+                columnStyles: { 
+                    0: { cellWidth: 20, halign: 'center' }
+                },
+                didParseCell: function(data) {
+                    const rowIndex = data.row.index;
+                    if (todos[rowIndex] && todos[rowIndex].resaltado && data.section === 'body') {
+                        data.cell.styles.fillColor = [252, 248, 227];
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                },
+                margin: { left: 30, right: 30 }
+            });
+            doc.save(`Lista_Barra_Colegio.pdf`);
+        }, { onlyOnce: true });
+    };
+</script>
+</body>
+</html>
