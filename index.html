@@ -55,9 +55,9 @@
         .list-card h5 { 
             letter-spacing: 1px; 
             text-transform: uppercase; 
-            border-bottom: 1px solid var(--border-soft);
-            padding-bottom: 10px;
             color: var(--gold-accent);
+            margin-bottom: 0;
+            font-size: 1rem;
         }
         .list-footer { font-weight: 600; color: #fff; text-align: right; }
 
@@ -180,8 +180,14 @@
                 granTotal += (count * 15);
                 const col = document.createElement('div');
                 col.className = 'col-custom p-2';
-                col.innerHTML = `<div class="list-card" onclick="abrirDetalle('${id}', '${sub.nombre}')">
-                    <h5>${sub.nombre}</h5><div class="list-footer">${count * 15} €</div></div>`;
+                col.innerHTML = `
+                    <div class="list-card" onclick="abrirDetalle('${id}', '${sub.nombre}')">
+                        <div class="d-flex justify-content-between align-items-start border-bottom border-secondary mb-2 pb-1">
+                            <h5>${sub.nombre}</h5>
+                            <span style="font-size: 0.65rem; color: var(--gold-accent); font-weight: bold;">${count} PERS.</span>
+                        </div>
+                        <div class="list-footer">${count * 15} €</div>
+                    </div>`;
                 contenedor.appendChild(col);
             });
         }
@@ -199,12 +205,17 @@
             listaPersonas.innerHTML = '';
             if (data && data.invitados) {
                 const invitados = Object.entries(data.invitados);
+                // Ordenar por Apellido Alfabéticamente
                 invitados.sort((a, b) => a[1].apellido.toLowerCase().localeCompare(b[1].apellido.toLowerCase()));
                 subtotalLabel.innerText = `${invitados.length * 15} €`;
-                invitados.forEach(([invId, inv]) => {
+                invitados.forEach(([invId, inv], index) => {
                     const item = document.createElement('div');
                     item.className = `person-item ${inv.resaltado ? 'resaltado' : ''}`;
-                    item.innerHTML = `<span>${caps(inv.nombre)} ${caps(inv.apellido)}</span>
+                    item.innerHTML = `
+                        <span>
+                            <strong class="me-2" style="color: var(--gold-accent); min-width: 25px; display: inline-block;">${index + 1}.</strong>
+                            ${caps(inv.nombre)} ${caps(inv.apellido)}
+                        </span>
                         <div class="d-flex gap-2">
                             <span class="action-link" style="color: var(--gold-accent)" onclick="toggleResaltar('${invId}', ${inv.resaltado})">Resaltar</span>
                             <span class="action-link text-danger" onclick="eliminarInvitado('${invId}')">Borrar</span>
@@ -250,7 +261,6 @@
             doc.setFontSize(22);
             doc.text("LISTA DE BARRA", 105, 20, { align: "center" });
             
-            // Subtítulo con el total de personas
             doc.setFont("helvetica", "normal");
             doc.setFontSize(11);
             doc.setTextColor(100);
@@ -283,4 +293,3 @@
 </script>
 </body>
 </html>
-
